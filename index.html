@@ -90,7 +90,7 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
 <h2><i>3</i>校对与导出</h2>
 <div class="row">
 <label class="f">筛选<input type="text" id="q" placeholder="搜索键名或文本"></label>
-<label class="f">&nbsp;<select id="only"><option value="">全部条目</option><option value="empty">仅未翻译</option><option value="bad">仅格式异常</option></select></label>
+<label class="f">&nbsp;<select id="only"><option value="">全部条目</option><option value="empty">仅未翻译</option><option value="bad">仅格式异常</option><option value="same">译文与原文相同</option></select></label>
 <button id="dl">导出新包</button>
 </div>
 <p class="hint">导出为 .zip；下载后把扩展名改回 .mcaddon / .mcpack / .mcworld 即可导入游戏。</p>
@@ -254,6 +254,7 @@ function refresh(){
   view=[];
   for(const g of act())for(const e of g.entries){
     if(o==="empty"&&e.dst)continue;
+    if(o==="same"&&(!e.dst||e.dst!==e.src))continue;
     if(o==="bad"&&(!e.dst||tok(e.src)===tok(e.dst)))continue;
     if(q&&!(e.key+e.src+e.dst).toLowerCase().includes(q))continue;
     view.push(e);
@@ -282,13 +283,13 @@ const PH=/§.|%(?:\d+\$)?[sdif%]|\{\d+\}|\\n|\\"|<[^>]{1,30}>|\$\{[^}]*\}|\$[A-Z
 function protect(s){const t=[];const x=s.replace(/\r?\n/g,' ').replace(PH,m=>{t.push(m);return '['+(t.length-1)+']'});return{x,t}}
 function restore(s,t){return s.replace(/\[\s*(\d+)\s*\]/g,(m,i)=>t[i]!==undefined?t[i]:m)}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let EP=0;
+let EP=0,SL='en';
 const E=encodeURIComponent,GP=j=>j[0].map(x=>x[0]).join('');
 const EPS=[
- (q,tl)=>['https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&dt=t&tl='+tl+'&q='+E(q),GP],
- (q,tl)=>['https://translate.google.com/translate_a/single?client=gtx&sl=auto&dt=t&tl='+tl+'&q='+E(q),GP],
- (q,tl)=>['https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl='+tl+'&q='+E(q),j=>j.sentences?j.sentences.map(x=>x.trans||'').join(''):[].concat(j).map(x=>Array.isArray(x)?x[0]:x).join('')],
- (q,tl)=>{if(q.length>450)throw new Error('too long');return['https://api.mymemory.translated.net/get?langpair=Autodetect|'+tl+'&q='+E(q),j=>{if(+j.responseStatus!==200)throw new Error('mm');return j.responseData.translatedText}]}
+ (q,tl)=>['https://translate.googleapis.com/translate_a/single?client=gtx&sl='+SL+'&dt=t&tl='+tl+'&q='+E(q),GP],
+ (q,tl)=>['https://translate.google.com/translate_a/single?client=gtx&sl='+SL+'&dt=t&tl='+tl+'&q='+E(q),GP],
+ (q,tl)=>['https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl='+SL+'&tl='+tl+'&q='+E(q),j=>j.sentences?j.sentences.map(x=>x.trans||'').join(''):[].concat(j).map(x=>Array.isArray(x)?x[0]:x).join('')],
+ (q,tl)=>{if(q.length>450)throw new Error('too long');return['https://api.mymemory.translated.net/get?langpair='+SL+'|'+tl+'&q='+E(q),j=>{if(+j.responseStatus!==200)throw new Error('mm');return j.responseData.translatedText}]}
 ];
 async function gcall(q,tl,sig){
   let last;
@@ -313,11 +314,12 @@ const isZh=s=>{const h=(s.match(/[\u3400-\u4dbf\u4e00-\u9fff]/g)||[]).length;if(
 async function translate(){
   const tgt=$("#tgt").value,over=$("#over").value,tl=GL[tgt]||tgt;
   const jobs=[];
-  for(const g of act())for(const e of g.entries)if((over==="all"||!e.dst)&&e.on!==false)jobs.push({g,e});
+  for(const g of act())for(const e of g.entries)if((over==="all"||!e.dst||e.dst===e.src)&&e.on!==false)jobs.push({g,e});
   let skipped=0;
   for(let i=jobs.length-1;i>=0;i--){const e=jobs[i].e;if(isZh(e.src)){e.dst=e.src;skipped++;jobs.splice(i,1)}}
   if(!jobs.length){msg(skipped?`已自动跳过 ${skipped} 条中文文本，没有其他需要翻译的条目。`:"没有需要翻译的条目。","ok");stat();refresh();return}
   abort=new AbortController();const sig=abort.signal;
+  SL=((jobs.find(j=>j.g.code)||{g:{}}).g.code||'en').slice(0,2).toLowerCase();
   $("#go").hidden=true;$("#stop").hidden=false;$("#bar").style.display="block";
   const bar=$("#bar div"),uniq=[...new Set(jobs.map(j=>j.e.src))],cache=new Map(),bad=new Set();
   const chunks=[];let cur=[],len=0;
