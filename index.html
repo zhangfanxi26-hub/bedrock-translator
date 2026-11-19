@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>基岩版 Mod 翻译工坊</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f1efe8;--surface:#fff;--ink:#23262b;--mute:#6b6f76;--line:#d6d2c4;--grass:#4f8a2b;--grass-ink:#fff;--slate:#2b2f36;--warn:#b4531a;--warn-bg:#fbeadb;--ok:#2b6e3a;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--surface:#20242a;--ink:#e8e6df;--mute:#9a9ea6;--line:#363b44;--grass:#6fb344;--grass-ink:#10220a;--slate:#0f1114;--warn:#f0a066;--warn-bg:#3a2a1c;--ok:#8fd19a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#16181c;--surface:#20242a;--ink:#e8e6df;--mute:#9a9ea6;--line:#363b44;--grass:#6fb344;--grass-ink:#10220a;--slate:#0f1114;--warn:#f0a066;--warn-bg:#3a2a1c;--ok:#8fd19a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
+header{background:var(--slate);color:#eee;border-bottom:6px solid var(--grass)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header .wrap{padding-top:28px;padding-bottom:26px}
+h1{margin:0 0 6px;font-size:clamp(26px,5vw,38px);letter-spacing:.02em;line-height:1.2}
+header p{margin:0;color:#b9bdc4;max-width:60ch}
+main{padding:26px 20px 60px}
+section{background:var(--surface);border:2px solid var(--line);margin-bottom:18px;padding:20px 22px;box-shadow:4px 4px 0 var(--line)}
+h2{margin:0 0 12px;font-size:18px;display:flex;gap:10px;align-items:center}
+h2 i{font-style:normal;background:var(--grass);color:var(--grass-ink);width:26px;height:26px;display:inline-grid;place-items:center;font-size:14px}
+#drop{border:2px dashed var(--mute);padding:34px 16px;text-align:center;cursor:pointer;display:block;transition:background .15s}
+#drop.on,#drop:hover,#drop:focus-within{background:var(--bg);border-color:var(--grass)}
+#drop b{display:block;font-size:17px}
+#drop span{color:var(--mute);font-size:14px}
+input[type=file]{position:absolute;opacity:0;width:1px;height:1px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mute)}
+select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);padding:7px 10px;border-radius:0}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:3px solid var(--grass);outline-offset:1px}
+button{font:inherit;font-weight:600;border:2px solid var(--slate);background:var(--grass);color:var(--grass-ink);padding:8px 18px;cursor:pointer;box-shadow:3px 3px 0 var(--slate)}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--slate)}
+button.alt{background:var(--surface);color:var(--ink)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.hint{color:var(--mute);font-size:14px;margin:8px 0 0}
+.pk{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pk div{border:2px solid var(--line);padding:6px 12px;font-size:14px}
+.pk b{display:block}
+.bar{height:10px;background:var(--bg);border:2px solid var(--line);margin-top:14px;display:none}
+.bar div{height:100%;width:0;background:var(--grass);transition:width .2s}
+#msg{margin-top:10px;font-size:14px;min-height:1.4em}
+#msg.err{color:var(--warn)}#msg.ok{color:var(--ok)}
+.tw{overflow-x:auto;margin-top:12px;border:2px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{background:var(--bg);position:sticky;top:0}
+td.k{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--mute);word-break:break-all;width:24%}
+td.s{width:34%;white-space:pre-wrap;word-break:break-word}
+td textarea{width:100%;min-height:38px;resize:vertical;padding:5px 8px}
+tr.bad td textarea{background:var(--warn-bg);border-color:var(--warn)}
+tr.bad td.t::after{content:"占位符/颜色代码与原文不一致";display:block;color:var(--warn);font-size:12px}
+[hidden]{display:none!important}
+footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>基岩版 Mod 翻译工坊</h1>
+<p>上传 .mcaddon / .mcpack / .mcworld 或整合包压缩包，自动提取 .lang、语言 JSON 以及脚本和 JSON 里的界面文本，交给 Google 翻译，校对后导出带新语言文件的包。</p>
+</div></header>
+<main class="wrap">
+
+<section>
+<h2><i>1</i>上传文件</h2>
+<label id="drop" tabindex="-1"><input id="file" type="file" accept=".mcaddon,.mcpack,.mcworld,.mctemplate,.zip">
+<b>点击选择，或把文件拖到这里</b><span>文件只在你的浏览器里处理；翻译时文本会发送给 Google 翻译。支持嵌套包（整合包里的多个 .mcpack）。</span></label>
+<div id="packs" class="pk"></div>
+<div id="msg" role="status"></div>
+</section>
+
+<section id="s2" hidden>
+<h2><i>2</i>翻译</h2>
+<div class="row">
+<label class="f">目标语言<select id="tgt">
+<option value="zh_CN">简体中文 zh_CN</option><option value="zh_TW">繁體中文 zh_TW</option>
+<option value="ja_JP">日本語 ja_JP</option><option value="ko_KR">한국어 ko_KR</option>
+<option value="ru_RU">Русский ru_RU</option><option value="es_ES">Español es_ES</option>
+<option value="fr_FR">Français fr_FR</option><option value="de_DE">Deutsch de_DE</option>
+<option value="pt_BR">Português pt_BR</option><option value="en_US">English en_US</option></select></label>
+<label class="f">已有译文<select id="over"><option value="skip">保留，只翻译空白</option><option value="all">全部重新翻译</option></select></label>
+<label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="scr" checked>也翻译脚本和 JSON 里的文本（直接改写原文件）</label><button id="go">开始翻译</button><button id="stop" class="alt" hidden>停止</button>
+</div>
+<div class="bar" id="bar"><div></div></div>
+<p class="hint" id="stat"></p>
+</section>
+
+<section id="s3" hidden>
+<h2><i>3</i>校对与导出</h2>
+<div class="row">
+<label class="f">筛选<input type="text" id="q" placeholder="搜索键名或文本"></label>
+<label class="f">&nbsp;<select id="only"><option value="">全部条目</option><option value="empty">仅未翻译</option><option value="bad">仅格式异常</option></select></label>
+<button id="dl">导出新包</button>
+</div>
+<p class="hint">导出为 .zip；下载后把扩展名改回 .mcaddon / .mcpack / .mcworld 即可导入游戏。</p>
+<div class="tw"><table><thead><tr><th>写入</th><th>键名 / 位置</th><th>原文</th><th>译文（可直接修改）</th></tr></thead><tbody id="tb"></tbody></table></div>
+<button id="more" class="alt" style="margin-top:12px" hidden>显示更多</button>
+</section>
+
+<section>
+<h2>说明</h2>
+<p class="hint" style="margin-top:0">基岩版的界面文本、方块、物品、实体名称都存放在 texts/*.lang。本工具读取其中的 en_US.lang（没有则取第一个），生成目标语言的 .lang 并写入 texts/languages.json。此外会扫描语言 JSON（texts/en_US.json 之类）以及 .js/.ts/.json 里的界面文本（title、display_name、lore、字符串字面量等），翻译后直接写回原文件，并在表格里给每条加了“写入”勾选框，取消勾选就不会改动。脚本扫描是启发式的，导出前请核对。</p>
+</section>
+</main>
+<footer>译文由 Google 翻译机器生成，方块/物品等专有名词可能与官方译名不同，请校对。<br>本站不是 Mojang 或微软官方产品。请只翻译你有权修改和分发的内容。</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const NAMES={en_US:"English",zh_CN:"简体中文",zh_TW:"繁体中文",ja_JP:"日语",ko_KR:"韩语",ru_RU:"俄语",es_ES:"西班牙语",fr_FR:"法语",de_DE:"德语",pt_BR:"巴西葡萄牙语"};
+let tree=null,groups=[],fname="pack",view=[],shown=0,abort=null;
+const PAGE=150;
+const tok=s=>(s.match(/§.|%(?:\d+\$)?[sdif%]|\{\d+\}|\\n/g)||[]).sort().join("|");
+
+function msg(t,c){const m=$("#msg");m.textContent=t||"";m.className=c||""}
+
+async function loadNode(zip,name){
+  const n={zip,name,kids:[]};
+  const paths=Object.keys(zip.files).filter(p=>!zip.files[p].dir);
+  for(const p of paths){
+    if(/\.(mcpack|mcaddon|zip|mctemplate)$/i.test(p)){
+      try{const z=await JSZip.loadAsync(await zip.files[p].async("uint8array"));const k=await loadNode(z,p);k.path=p;n.kids.push(k)}catch(e){}
+    }
+  }
+  const by={};
+  for(const p of paths){
+    const m=p.match(/^(.*?)texts\/([A-Za-z]{2,3}_[A-Za-z]{2,4})\.lang$/);
+    if(m){(by[m[1]]=by[m[1]]||{})[m[2]]=p}
+  }
+  for(const pre of Object.keys(by)){
+    const langs=by[pre];
+    const code=langs.en_US?"en_US":Object.keys(langs)[0];
+    let label=(pre||"（根目录）").replace(/\/$/,"");
+    const mf=zip.files[pre+"manifest.json"];
+    if(mf){try{const j=JSON.parse((await mf.async("string")).replace(/^\uFEFF/,"").replace(/\/\/.*$/gm,""));const nm=j.header&&j.header.name;if(nm&&!/^pack\./.test(nm))label=nm+" · "+label}catch(e){}}
+    groups.push({zip,pre,langs,code,label:(name?name+" ▸ ":"")+label,entries:parseLang(await zip.files[langs[code]].async("string"))});
+  }
+  await extra(zip,name,paths);
+  return n;
+}
+function parseLang(t){
+  const out=[];
+  for(const raw of t.replace(/^\uFEFF/,"").split(/\r?\n/)){
+    const l=raw.split("\t#")[0],s=l.trim();
+    const i=l.indexOf("=");
+    if(i<1||s.startsWith("#")||s.startsWith("//"))continue;
+    out.push({key:l.slice(0,i).trim(),src:l.slice(i+1).replace(/\s+$/,""),dst:""});
+  }
+  return out;
+}
+const act=()=>groups.filter(g=>g.kind!=='inplace'||$('#scr').checked);$('#scr').onchange=()=>refresh();
+const LJ=/^(.*\/)?(texts|lang|locales?|i18n|languages?)\/([A-Za-z]{2,3}(?:[_-][A-Za-z]{2,4})?)\.json$/;
+const SK=/\b(import|require|console\.\w+|getComponent|hasTag|addTag|removeTag|runCommand\w*|DynamicProperty|getDimension|typeId|identifier|subscribe|case)\b/;
+const JK=/^(display_name|displayName|title|body|text|label|lore|message|button\d?|nameTag|name_tag|custom_name|tooltip|subtitle)$/i;
+function flat(o,p,out){for(const k in o){const v=o[k],q=p?p+'.'+k:k;if(typeof v==='string'){if(v.trim())out.push({key:q,src:v,dst:''})}else if(v&&typeof v==='object')flat(v,q,out)}}
+function scan(t,json){
+  const out=[],re=/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`/g;let m,last=0,ln=1;
+  while((m=re.exec(t))){
+    const lit=m[0],q=lit[0],v=lit.slice(1,-1),a=m.index,b=a+lit.length;
+    if(v.length>400||!/\p{L}/u.test(v)||v.includes('${'))continue;
+    const before=t.slice(Math.max(0,a-150),a),ls=before.slice(before.lastIndexOf('\n')+1),after=t.slice(b,b+12);
+    let ok;
+    if(json){const km=before.match(/"([^"]+)"\s*:\s*(?:\[\s*(?:"(?:[^"\\]|\\.)*"\s*,\s*)*)?$/);ok=km&&JK.test(km[1])&&!/^[#$@%]/.test(v)&&!/^[a-z0-9_.:\/-]+$/.test(v)&&!/^[A-Z0-9_]+$/.test(v)}
+    else{ok=(/\s|§|[^\x00-\x7F]/.test(v)||/^[A-Z][a-z]{2,}$/.test(v))&&!SK.test(ls)&&!/^\s*(\/\/|\*|\/\*)/.test(ls)&&!/(===?|!==?)\s*$/.test(ls)&&!/^\s*(===?|!==?)/.test(after)&&!(/^\s*:/.test(after)&&/[{,]\s*$/.test(ls))}
+    if(!ok)continue;
+    ln+=(t.slice(last,a).match(/\n/g)||[]).length;last=a;
+    out.push({key:'行 '+ln,src:v,dst:'',ip:true,on:true,a:a+1,b:b-1,q});
+  }
+  return out;
+}
+async function extra(zip,name,paths){
+  const by={},skip=new Set(),pre=name?name+' ▸ ':'';
+  for(const p of paths){const m=p.match(LJ);if(m){const d=(m[1]||'')+m[2]+'/';(by[d]=by[d]||{})[m[3]]=p}}
+  for(const d in by){
+    const langs=by[d],code=['en_US','en-US','en'].find(c=>langs[c])||Object.keys(langs)[0];
+    Object.values(langs).forEach(p=>skip.add(p));
+    let obj;try{obj=JSON.parse((await zip.files[langs[code]].async('string')).replace(/^\uFEFF/,'').replace(/^\s*\/\/.*$/gm,''))}catch(e){continue}
+    const entries=[];flat(obj,'',entries);
+    if(entries.length)groups.push({kind:'json',zip,dir:d,langs,code,obj,label:pre+d+'*.json',entries});
+  }
+  for(const p of paths){
+    if(skip.has(p)||!/\.(js|mjs|ts|json)$/i.test(p)||/(^|\/)(node_modules\/|manifest\.json$|package(-lock)?\.json$)|languages?(_names)?\.json$/i.test(p))continue;
+    const text=await zip.files[p].async('string');
+    if(text.length>1.5e6)continue;
+    const entries=scan(text,/\.json$/i.test(p));
+    if(entries.length)groups.push({kind:'inplace',zip,path:p,text,label:pre+p,entries});
+  }
+}
+const esc=(s,q)=>{let o='';for(let i=0;i<s.length;i++){const c=s[i];if(c==='\\'){o+=c+(s[++i]||'')}else o+=c===q?'\\'+c:c}return o};
+function writeIn(g){
+  let t=g.text;
+  for(const e of g.entries.filter(e=>e.on!==false&&e.dst).sort((x,y)=>y.a-x.a))t=t.slice(0,e.a)+esc(e.dst.replace(/\r?\n/g,'\\n'),e.q)+t.slice(e.b);
+  g.zip.file(g.path,t);
+}
+async function writeJson(g,tgt){
+  const map=new Map(g.entries.map(e=>[e.key,e]));
+  const fill=(o,p)=>{const r=Array.isArray(o)?[]:{};for(const k in o){const v=o[k],q=p?p+'.'+k:k;r[k]=typeof v==='string'?((map.get(q)||{}).dst||v):v&&typeof v==='object'?fill(v,q):v}return r};
+  g.zip.file(g.dir+tgt.replace('_',g.code.includes('-')?'-':'_')+'.json',JSON.stringify(fill(g.obj,''),null,2));
+  if(/texts\/$/.test(g.dir)){
+    const lp=g.dir+'languages.json';let arr=[];
+    try{if(g.zip.files[lp])arr=JSON.parse(await g.zip.files[lp].async('string'))}catch(e){}
+    if(!Array.isArray(arr))arr=[];
+    [...(/^[a-z]{2}_[A-Z]{2}$/.test(g.code)?[g.code]:[]),tgt].forEach(c=>{if(!arr.includes(c))arr.push(c)});
+    g.zip.file(lp,JSON.stringify(arr,null,2));
+  }
+}
+async function readMap(g,p){
+  const t=await g.zip.files[p].async('string');
+  if(g.kind==='json'){try{const o=[];flat(JSON.parse(t.replace(/^\uFEFF/,'').replace(/^\s*\/\/.*$/gm,'')),'',o);return new Map(o.map(e=>[e.key,e.src]))}catch(e){return new Map()}}
+  return new Map(parseLang(t).map(e=>[e.key,e.src]));
+}
+async function prefill(){
+  const tgt=$("#tgt").value;
+  for(const g of groups){
+    const p=g.langs&&g.langs[tgt];if(!p||tgt===g.code)continue;
+    const m=await readMap(g,p);
+    g.entries.forEach(e=>{if(!e.dst&&m.has(e.key))e.dst=m.get(e.key)});
+  }
+}
+async function onFile(f){
+  if(!f)return;
+  msg("正在读取…");$("#packs").textContent="";groups=[];
+  try{
+    const zip=await JSZip.loadAsync(f);
+    fname=f.name.replace(/\.[^.]+$/,"");
+    tree=await loadNode(zip,"");
+  }catch(e){msg("无法解压：请确认这是 .mcaddon / .mcpack / .mcworld / .zip 文件。","err");return}
+  groups=groups.filter(g=>g.entries.length);const nl=groups.filter(g=>g.kind!=='inplace');
+  if(!groups.length){msg("没有找到可翻译的语言文件或脚本/JSON 界面文本。","err");$("#s2").hidden=$("#s3").hidden=true;return}
+  const total=groups.reduce((a,g)=>a+g.entries.length,0);
+  for(const g of groups){
+    const d=document.createElement("div"),b=document.createElement("b");
+    if(g.kind==='inplace')continue;b.textContent=g.label;d.append(b,`${g.entries.length} 条 · 源语言 ${g.code}`);$("#packs").append(d);
+  }
+  await prefill();
+  const ip=groups.filter(g=>g.kind==='inplace');msg(`找到 ${nl.length} 组语言文件；另有 ${ip.length} 个脚本/JSON 文件含 ${ip.reduce((a,g)=>a+g.entries.length,0)} 条可见文本。共 ${total} 条。`,"ok");
+  $("#s2").hidden=$("#s3").hidden=false;
+  refresh();
+}
+$("#file").onchange=e=>onFile(e.target.files[0]);
+const dz=$("#drop");
+["dragover","dragenter"].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.add("on")}));
+["dragleave","drop"].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.remove("on")}));
+dz.addEventListener("drop",e=>onFile(e.dataTransfer.files[0]));
+$("#tgt").onchange=async()=>{groups.forEach(g=>g.entries.forEach(e=>e.dst=""));await prefill();refresh()};
+
+function stat(){
+  const all=act().flatMap(g=>g.entries),done=all.filter(e=>e.dst).length;
+  $("#stat").textContent=`已翻译 ${done} / ${all.length} 条`;
+}
+function refresh(){
+  const q=$("#q").value.trim().toLowerCase(),o=$("#only").value;
+  view=[];
+  for(const g of act())for(const e of g.entries){
+    if(o==="empty"&&e.dst)continue;
+    if(o==="bad"&&(!e.dst||tok(e.src)===tok(e.dst)))continue;
+    if(q&&!(e.key+e.src+e.dst).toLowerCase().includes(q))continue;
+    view.push(e);
+  }
+  $("#tb").textContent="";shown=0;more();stat();
+}
+function more(){
+  const end=Math.min(view.length,shown+PAGE);
+  for(;shown<end;shown++){
+    const e=view[shown],tr=document.createElement("tr");
+    const c=document.createElement("td");if(e.ip){const cb=document.createElement("input");cb.type="checkbox";cb.checked=e.on!==false;cb.onchange=()=>e.on=cb.checked;c.append(cb)}const k=document.createElement("td");k.className="k";k.textContent=e.key;
+    const s=document.createElement("td");s.className="s";s.textContent=e.src;
+    const t=document.createElement("td");t.className="t";
+    const ta=document.createElement("textarea");ta.value=e.dst;ta.rows=1;
+    ta.oninput=()=>{e.dst=ta.value;tr.classList.toggle("bad",!!e.dst&&tok(e.src)!==tok(e.dst));stat()};
+    t.append(ta);tr.append(c,k,s,t);
+    tr.classList.toggle("bad",!!e.dst&&tok(e.src)!==tok(e.dst));
+    $("#tb").append(tr);
+  }
+  $("#more").hidden=shown>=view.length;
+}
+$("#more").onclick=more;$("#q").oninput=refresh;$("#only").onchange=refresh;
+
+const GL={zh_CN:'zh-CN',zh_TW:'zh-TW',ja_JP:'ja',ko_KR:'ko',ru_RU:'ru',es_ES:'es',fr_FR:'fr',de_DE:'de',pt_BR:'pt',en_US:'en'};
+const PH=/§.|%(?:\d+\$)?[sdif%]|\{\d+\}|\\n|\\"|<[^>]{1,30}>|\$\{[^}]*\}|\$[A-Za-z_]\w*/g;
+function protect(s){const t=[];const x=s.replace(/\r?\n/g,' ').replace(PH,m=>{t.push(m);return '['+(t.length-1)+']'});return{x,t}}
+function restore(s,t){return s.replace(/\[\s*(\d+)\s*\]/g,(m,i)=>t[i]!==undefined?t[i]:m)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let EP=0;
+const E=encodeURIComponent,GP=j=>j[0].map(x=>x[0]).join('');
+const EPS=[
+ (q,tl)=>['https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&dt=t&tl='+tl+'&q='+E(q),GP],
+ (q,tl)=>['https://translate.google.com/translate_a/single?client=gtx&sl=auto&dt=t&tl='+tl+'&q='+E(q),GP],
+ (q,tl)=>['https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl='+tl+'&q='+E(q),j=>j.sentences?j.sentences.map(x=>x.trans||'').join(''):[].concat(j).map(x=>Array.isArray(x)?x[0]:x).join('')],
+ (q,tl)=>{if(q.length>450)throw new Error('too long');return['https://api.mymemory.translated.net/get?langpair=Autodetect|'+tl+'&q='+E(q),j=>{if(+j.responseStatus!==200)throw new Error('mm');return j.responseData.translatedText}]}
+];
+async function gcall(q,tl,sig){
+  let last;
+  for(let a=0;a<2;a++){
+    for(let k=0;k<EPS.length;k++){
+      if(sig.aborted)throw new Error('aborted');
+      const i=(EP+k)%EPS.length;
+      try{
+        const [u,parse]=EPS[i](q,tl);
+        const r=await fetch(u);
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const t=parse(await r.json());
+        if(typeof t!=='string'||!t)throw new Error('empty');
+        EP=i;return t;
+      }catch(e){last=e}
+    }
+    await sleep(1500);
+  }
+  throw last;
+}
+const isZh=s=>{const h=(s.match(/[\u3400-\u4dbf\u4e00-\u9fff]/g)||[]).length;if(!h)return false;const l=(s.match(/\p{L}/gu)||[]).length;return h*2>=l};
+async function translate(){
+  const tgt=$("#tgt").value,over=$("#over").value,tl=GL[tgt]||tgt;
+  const jobs=[];
+  for(const g of act())for(const e of g.entries)if((over==="all"||!e.dst)&&e.on!==false)jobs.push({g,e});
+  let skipped=0;
+  for(let i=jobs.length-1;i>=0;i--){const e=jobs[i].e;if(isZh(e.src)){e.dst=e.src;skipped++;jobs.splice(i,1)}}
+  if(!jobs.length){msg(skipped?`已自动跳过 ${skipped} 条中文文本，没有其他需要翻译的条目。`:"没有需要翻译的条目。","ok");stat();refresh();return}
+  abort=new AbortController();const sig=abort.signal;
+  $("#go").hidden=true;$("#stop").hidden=false;$("#bar").style.display="block";
+  const bar=$("#bar div"),uniq=[...new Set(jobs.map(j=>j.e.src))],cache=new Map(),bad=new Set();
+  const chunks=[];let cur=[],len=0;
+  for(const s of uniq){const L=encodeURIComponent(s).length+3;if(cur.length&&(len+L>1400||cur.length>=25)){chunks.push(cur);cur=[];len=0}cur.push(s);len+=L}
+  if(cur.length)chunks.push(cur);
+  let n=0,netErr="";
+  for(const ch of chunks){
+    if(sig.aborted)break;
+    const prep=ch.map(protect);
+    try{
+      let out=(await gcall(prep.map(p=>p.x).join("\n"),tl,sig)).split("\n");
+      if(out.length!==ch.length){out=[];for(const p of prep){out.push(await gcall(p.x,tl,sig));await sleep(120)}}
+      ch.forEach((s,i)=>cache.set(s,restore(out[i].trim(),prep[i].t)));
+    }catch(err){if(sig.aborted)break;ch.forEach(s=>bad.add(s));netErr=(err&&err.message)||String(err)}
+    n+=ch.length;bar.style.width=(n/uniq.length*100)+"%";
+    await sleep(250);
+  }
+  let fail=0;
+  for(const j of jobs){if(cache.has(j.e.src))j.e.dst=cache.get(j.e.src);else fail++}
+  stat();
+  const stopped=sig.aborted;
+  $("#go").hidden=false;$("#stop").hidden=true;
+  msg(stopped?"已停止。":fail?`有 ${fail} 条失败（${netErr}）。${/fetch/i.test(netErr)?"浏览器拦截了请求或无法连到翻译服务：请把本文件保存到电脑，用 Chrome/Edge 直接双击打开（不要在 claude.ai 里打开），并确认网络能访问 Google。":"请稍后再次点击“开始翻译”补译。"}${skipped?`（另跳过中文 ${skipped} 条）`:""}`:`翻译完成${skipped?`，已自动跳过 ${skipped} 条中文文本`:""}，请在下方校对。`,fail||stopped?"err":"ok");
+  refresh();
+}
+$("#go").onclick=translate;
+$("#stop").onclick=()=>abort&&abort.abort();
+
+async function build(node){
+  for(const k of node.kids)node.zip.file(k.path,await build(k));
+  return node.zip.generateAsync({type:"blob",compression:"DEFLATE"});
+}
+$("#dl").onclick=async()=>{
+  const tgt=$("#tgt").value;
+  const todo=act().filter(g=>g.entries.some(e=>e.dst));
+  if(!todo.length){msg("还没有译文可导出。","err");return}
+  $("#dl").disabled=true;msg("正在打包…");
+  try{
+    for(const g of todo){if(g.kind==='inplace'){writeIn(g);continue}if(g.kind==='json'){await writeJson(g,tgt);continue}
+      const body=g.entries.map(e=>`${e.key}=${(e.dst||e.src).replace(/\r?\n/g,"\\n")}`).join("\n")+"\n";
+      g.zip.file(g.pre+"texts/"+tgt+".lang",body);
+      const lp=g.pre+"texts/languages.json";let arr=[];
+      try{if(g.zip.files[lp])arr=JSON.parse((await g.zip.files[lp].async("string")).replace(/^\uFEFF/,""))}catch(e){arr=[]}
+      if(!Array.isArray(arr))arr=[];
+      [g.code,tgt].forEach(c=>{if(!arr.includes(c))arr.push(c)});
+      g.zip.file(lp,JSON.stringify(arr,null,2));
+    }
+    const blob=await build(tree);
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${fname}_${tgt}.zip`;
+    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    msg("已导出。","ok");
+  }catch(e){
+    msg("导出失败："+((e&&e.message)||e),"err");
+  }finally{$("#dl").disabled=false}
+};
+</script>
+</body>
+</html>
