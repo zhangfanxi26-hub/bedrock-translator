@@ -82,6 +82,7 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
 <label class="f">已有译文<select id="over"><option value="skip">保留，只翻译空白</option><option value="all">全部重新翻译</option></select></label>
 <label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="scr" checked>也翻译脚本和 JSON 里的文本（直接改写原文件）</label><button id="go">开始翻译</button><button id="stop" class="alt" hidden>停止</button>
 </div>
+<details style="margin-top:14px"><summary>术语表（可选）：固定某些词的译法</summary><textarea id="glo" rows="4" style="width:100%;margin-top:8px" placeholder="每行一条，格式：英文=译文&#10;例如：&#10;Actual Guns=Actual Guns&#10;camerashake=镜头抖动"></textarea><p class="hint">不区分大小写，按整词匹配。想保持原名不翻译，就把译文写成和英文一样。</p></details>
 <div class="bar" id="bar"><div></div></div>
 <p class="hint" id="stat"></p>
 </section>
@@ -280,7 +281,9 @@ $("#more").onclick=more;$("#q").oninput=refresh;$("#only").onchange=refresh;
 
 const GL={zh_CN:'zh-CN',zh_TW:'zh-TW',ja_JP:'ja',ko_KR:'ko',ru_RU:'ru',es_ES:'es',fr_FR:'fr',de_DE:'de',pt_BR:'pt',en_US:'en'};
 const PH=/§.|%(?:\d+\$)?[sdif%]|\{\d+\}|\\n|\\"|<[^>]{1,30}>|\$\{[^}]*\}|\$[A-Za-z_]\w*/g;
-function protect(s){const t=[];const x=s.replace(/\r?\n/g,' ').replace(PH,m=>{t.push(m);return '['+(t.length-1)+']'});return{x,t}}
+let GLO=[];
+const rx=t=>new RegExp('(?<![A-Za-z])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![A-Za-z])','gi');
+function protect(s){const t=[];let x=s.replace(/\r?\n/g,' ');for(const [a,b] of GLO)x=x.replace(rx(a),()=>{t.push(b);return '['+(t.length-1)+']'});x=x.replace(PH,m=>{t.push(m);return '['+(t.length-1)+']'});return{x,t}}
 function restore(s,t){return s.replace(/\[\s*(\d+)\s*\]/g,(m,i)=>t[i]!==undefined?t[i]:m)}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let EP=0,SL='en';
@@ -321,22 +324,19 @@ async function translate(){
   abort=new AbortController();const sig=abort.signal;
   SL=((jobs.find(j=>j.g.code)||{g:{}}).g.code||'en').slice(0,2).toLowerCase();
   $("#go").hidden=true;$("#stop").hidden=false;$("#bar").style.display="block";
-  const bar=$("#bar div"),uniq=[...new Set(jobs.map(j=>j.e.src))],cache=new Map(),bad=new Set();
-  const chunks=[];let cur=[],len=0;
-  for(const s of uniq){const L=encodeURIComponent(s).length+3;if(cur.length&&(len+L>1400||cur.length>=25)){chunks.push(cur);cur=[];len=0}cur.push(s);len+=L}
-  if(cur.length)chunks.push(cur);
-  let n=0,netErr="";
-  for(const ch of chunks){
-    if(sig.aborted)break;
-    const prep=ch.map(protect);
-    try{
-      let out=(await gcall(prep.map(p=>p.x).join("\n"),tl,sig)).split("\n");
-      if(out.length!==ch.length){out=[];for(const p of prep){out.push(await gcall(p.x,tl,sig));await sleep(120)}}
-      ch.forEach((s,i)=>cache.set(s,restore(out[i].trim(),prep[i].t)));
-    }catch(err){if(sig.aborted)break;ch.forEach(s=>bad.add(s));netErr=(err&&err.message)||String(err)}
-    n+=ch.length;bar.style.width=(n/uniq.length*100)+"%";
-    await sleep(250);
-  }
+  const bar=$("#bar div"),uniq=[...new Set(jobs.map(j=>j.e.src))],cache=new Map();
+  GLO=$("#glo").value.split(/\r?\n/).map(l=>{const i=l.indexOf('=');return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:null}).filter(x=>x&&x[0]&&x[1]).sort((x,y)=>y[0].length-x[0].length);
+  let n=0,netErr="",qi=0;
+  const worker=async()=>{
+    while(!sig.aborted&&qi<uniq.length){
+      const s=uniq[qi++],p=protect(s);
+      try{const o=await gcall(p.x,tl,sig);cache.set(s,restore(o.trim(),p.t))}
+      catch(err){if(!sig.aborted)netErr=(err&&err.message)||String(err)}
+      n++;bar.style.width=(n/uniq.length*100)+"%";
+      await sleep(120);
+    }
+  };
+  await Promise.all([worker(),worker(),worker(),worker()]);
   let fail=0;
   for(const j of jobs){if(cache.has(j.e.src))j.e.dst=cache.get(j.e.src);else fail++}
   stat();
