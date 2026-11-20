@@ -101,7 +101,7 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
 <label class="f">&nbsp;<select id="only"><option value="">全部条目</option><option value="empty">仅未翻译</option><option value="bad">仅格式异常</option><option value="same">译文与原文相同</option></select></label>
 <button id="dl">导出新包</button>
 </div>
-<p class="hint">导出为 .zip；下载后把扩展名改回 .mcaddon / .mcpack / .mcworld 即可导入游戏。</p>
+<p class="hint">导出的文件和你上传的文件扩展名相同（.mcaddon / .mcpack / .mcworld），下载后可以直接双击导入游戏。</p>
 <div class="tw"><table><thead><tr><th>写入</th><th>键名 / 位置</th><th>原文</th><th>译文（可直接修改）</th></tr></thead><tbody id="tb"></tbody></table></div>
 <button id="more" class="alt" style="margin-top:12px" hidden>显示更多</button>
 </section>
@@ -117,7 +117,7 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
 <script>
 const $=s=>document.querySelector(s);
 const NAMES={en_US:"English",zh_CN:"简体中文",zh_TW:"繁体中文",ja_JP:"日语",ko_KR:"韩语",ru_RU:"俄语",es_ES:"西班牙语",fr_FR:"法语",de_DE:"德语",pt_BR:"巴西葡萄牙语"};
-let tree=null,groups=[],fname="pack",view=[],shown=0,abort=null;
+let tree=null,groups=[],fname="pack",fext="zip",view=[],shown=0,abort=null;
 const PAGE=150;
 const tok=s=>(s.match(/§.|%(?:\d+\$)?[sdif%]|\{\d+\}|\\n/g)||[]).sort().join("|");
 
@@ -231,7 +231,7 @@ async function onFile(f){
   msg("正在读取…");$("#packs").textContent="";groups=[];
   try{
     const zip=await JSZip.loadAsync(f);
-    fname=f.name.replace(/\.[^.]+$/,"");
+    fname=f.name.replace(/\.[^.]+$/,"");fext=((f.name.match(/\.([^.]+)$/)||[])[1]||"zip").toLowerCase();
     tree=await loadNode(zip,"");
   }catch(e){msg("无法解压：请确认这是 .mcaddon / .mcpack / .mcworld / .zip 文件。","err");return}
   groups=groups.filter(g=>g.entries.length);const nl=groups.filter(g=>g.kind!=='inplace');
@@ -507,7 +507,7 @@ $("#dl").onclick=async()=>{
       g.zip.file(lp,JSON.stringify(arr,null,2));
     }
     const blob=await build(tree);
-    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${fname}_${tgt}.zip`;
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${fname}_${tgt}.${fext}`;
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
     msg("已导出。","ok");
   }catch(e){
