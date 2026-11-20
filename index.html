@@ -85,6 +85,13 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
 <details style="margin-top:14px"><summary>术语表（可选）：固定某些词的译法</summary><textarea id="glo" rows="4" style="width:100%;margin-top:8px" placeholder="每行一条，格式：英文=译文&#10;例如：&#10;Actual Guns=Actual Guns&#10;camerashake=镜头抖动"></textarea><p class="hint">不区分大小写，按整词匹配。想保持原名不翻译，就把译文写成和英文一样。</p></details>
 <div class="bar" id="bar"><div></div></div>
 <p class="hint" id="stat"></p>
+<details open style="margin-top:16px"><summary><b>想要更准确？用免费 AI 对话来翻译</b></summary>
+<p class="hint">机器翻译不懂 mod 的设定。这里把条目连同键名打包成提示词，你粘贴到任意免费 AI 聊天（ChatGPT、DeepSeek、Kimi、豆包、Gemini 等都行），再把回复粘贴回来导入。AI 能结合 mod 主题和键名来取名，通常比 Google 准得多。</p>
+<label class="f">这个 mod 讲什么（可选，写得越具体越好）<textarea id="ctx" rows="2" style="width:100%" placeholder="例如：生物 mod，给原版怪物添加变异版本，名字要有压迫感，不要太口语"></textarea></label>
+<div class="row" style="margin-top:10px"><label class="f">每批条目数<select id="bs"><option>30</option><option selected>60</option><option>100</option></select></label><label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="aiall">包含已有译文（会覆盖）</label><button id="pp">生成下一批提示词</button></div>
+<textarea id="pr" readonly hidden style="width:100%;height:150px;margin-top:10px"></textarea>
+<label class="f" style="margin-top:10px">把 AI 的回复粘贴到这里<textarea id="pin" rows="4" style="width:100%"></textarea></label>
+<p style="margin:10px 0 0"><button id="imp">导入译文</button></p><p class="hint" id="aimsg"></p></details>
 </section>
 
 <section id="s3" hidden>
@@ -506,6 +513,48 @@ $("#dl").onclick=async()=>{
   }catch(e){
     msg("导出失败："+((e&&e.message)||e),"err");
   }finally{$("#dl").disabled=false}
+};
+
+const parseG=t=>t.split(/\r?\n/).map(l=>{const i=l.indexOf('=');return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:null}).filter(x=>x&&x[0]&&x[1]);
+let pend=[];const aiDone=new Set();
+const aimsg=(t,bad)=>{$('#aimsg').textContent=t;$('#aimsg').style.color=bad?'var(--warn)':''};
+$('#tgt').addEventListener('change',()=>aiDone.clear());
+function todoAI(){const all=$('#aiall').checked,o=[];for(const g of act())for(const e of g.entries){if(e.on===false||aiDone.has(e)||isZh(e.src))continue;if(all||!e.dst||e.dst===e.src)o.push(e)}return o}
+$('#pp').onclick=async()=>{
+  const list=todoAI();
+  if(!list.length){aimsg('没有需要处理的条目了。');return}
+  pend=list.slice(0,+$('#bs').value);
+  const tgt=$('#tgt').value,name={zh_CN:'简体中文',zh_TW:'繁体中文'}[tgt]||tgt;
+  const items=pend.map((e,i)=>({id:String(i+1),key:e.key,text:e.src}));
+  const blob=pend.map(e=>e.src).join('\n'),seen=new Set(),gl=[];
+  for(const [a,b] of [...parseG($('#glo').value),...(tgt.startsWith('zh')?parseG(BUILTIN):[])]){
+    const k=a.toLowerCase();if(seen.has(k)||!rx(a).test(blob))continue;seen.add(k);gl.push(a+' = '+b);
+  }
+  const ctx=$('#ctx').value.trim();
+  const text=`你是 Minecraft 基岩版 mod 的资深本地化译者，请把下面的语言文件条目翻译成${name}。${ctx?'\n这个 mod 的背景：'+ctx:''}
+规则：
+1. 方块、物品、生物、效果、附魔使用 Minecraft 官方中文译名。
+2. mod 自创的名称，要结合键名（例如 entity.xxx 表示生物，item.xxx 表示物品）和 mod 主题，译成简短、自然、符合游戏风格的中文，不要直译成无关的日常词。
+3. 原样保留 §a 这类颜色代码、%s、%d、%1$s、{0}、\\n、<标签>、$变量。
+4. 键名以 item.spawn_egg. 开头、原文是 "Spawn X" 的，译为 "X刷怪蛋"。
+5. 同一个词在所有条目里译法保持一致。${gl.length?'\n6. 必须使用这份术语表：\n'+gl.join('\n'):''}
+输出：只输出一个 JSON 对象，键是条目的 id，值是译文；不要解释，不要加代码块标记。
+条目：
+${JSON.stringify(items,null,1)}`;
+  const pr=$('#pr');pr.value=text;pr.hidden=false;
+  const left=list.length-pend.length;
+  try{await navigator.clipboard.writeText(text);aimsg(`已复制本批 ${pend.length} 条的提示词（还剩 ${left} 条）。粘贴到 AI 聊天里发送，再把回复粘贴到下面。`)}
+  catch(e){pr.select();aimsg(`请手动复制上面框里的全部文字（本批 ${pend.length} 条，还剩 ${left} 条），粘贴到 AI 聊天里发送。`)}
+};
+$('#imp').onclick=()=>{
+  const s=$('#pin').value.trim();let o;
+  try{o=s[0]==='['?JSON.parse(s.slice(0,s.lastIndexOf(']')+1)):JSON.parse(s.slice(s.indexOf('{'),s.lastIndexOf('}')+1))}
+  catch(e){aimsg('读不懂这段回复：请让 AI 只输出 JSON，并完整粘贴（从 { 到 }）。',1);return}
+  if(!pend.length){aimsg('请先点“生成下一批提示词”。',1);return}
+  let n=0;
+  pend.forEach((e,i)=>{const v=Array.isArray(o)?o[i]:o[String(i+1)];if(typeof v==='string'&&v.trim()){e.dst=v.trim();aiDone.add(e);n++}});
+  aimsg(`已导入 ${n} / ${pend.length} 条。`+(n<pend.length?'有的条目 AI 没返回，下次生成提示词时会再带上。':'可以再点“生成下一批提示词”继续。'),n<pend.length);
+  $('#pin').value='';refresh();
 };
 </script>
 </body>
