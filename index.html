@@ -80,7 +80,7 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 30px}
 <option value="fr_FR">Français fr_FR</option><option value="de_DE">Deutsch de_DE</option>
 <option value="pt_BR">Português pt_BR</option><option value="en_US">English en_US</option></select></label>
 <label class="f">已有译文<select id="over"><option value="skip">保留，只翻译空白</option><option value="all">全部重新翻译</option></select></label>
-<label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="scr" checked>也翻译脚本和 JSON 里的文本（直接改写原文件）</label><button id="go">开始翻译</button><button id="stop" class="alt" hidden>停止</button>
+<label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="scr" checked>也翻译脚本和 JSON 里的文本（直接改写原文件）</label><label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="bg" checked>使用内置 Minecraft 官方术语表</label><button id="go">开始翻译</button><button id="stop" class="alt" hidden>停止</button>
 </div>
 <details style="margin-top:14px"><summary>术语表（可选）：固定某些词的译法</summary><textarea id="glo" rows="4" style="width:100%;margin-top:8px" placeholder="每行一条，格式：英文=译文&#10;例如：&#10;Actual Guns=Actual Guns&#10;camerashake=镜头抖动"></textarea><p class="hint">不区分大小写，按整词匹配。想保持原名不翻译，就把译文写成和英文一样。</p></details>
 <div class="bar" id="bar"><div></div></div>
@@ -282,7 +282,130 @@ $("#more").onclick=more;$("#q").oninput=refresh;$("#only").onchange=refresh;
 const GL={zh_CN:'zh-CN',zh_TW:'zh-TW',ja_JP:'ja',ko_KR:'ko',ru_RU:'ru',es_ES:'es',fr_FR:'fr',de_DE:'de',pt_BR:'pt',en_US:'en'};
 const PH=/§.|%(?:\d+\$)?[sdif%]|\{\d+\}|\\n|\\"|<[^>]{1,30}>|\$\{[^}]*\}|\$[A-Za-z_]\w*/g;
 let GLO=[];
-const rx=t=>new RegExp('(?<![A-Za-z])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![A-Za-z])','gi');
+const BUILTIN=`Creeper=苦力怕
+Zombified Piglin=僵尸猪灵
+Zombie Villager=僵尸村民
+Zombie=僵尸
+Wither Skeleton=凋灵骷髅
+Skeleton=骷髅
+Stray=流浪者
+Bogged=沼骸
+Wither Rose=凋零玫瑰
+Wither=凋灵
+Cave Spider=洞穴蜘蛛
+Spider=蜘蛛
+Enderman=末影人
+Ender Dragon=末影龙
+Ender Pearl=末影珍珠
+Endermite=末影螨
+Blaze Powder=烈焰粉
+Blaze Rod=烈焰棒
+Blaze=烈焰人
+Ghast=恶魂
+Slime Ball=粘液球
+Slime=史莱姆
+Magma Cube=岩浆怪
+Witch=女巫
+Villager=村民
+Pillager=掠夺者
+Vindicator=卫道士
+Evoker=唤魔者
+Ravager=劫掠兽
+Vex=恼鬼
+Phantom=幻翼
+Drowned=溺尸
+Husk=尸壳
+Piglin=猪灵
+Zoglin=僵尸疣猪兽
+Hoglin=疣猪兽
+Strider=炽足兽
+Elder Guardian=远古守卫者
+Guardian=守卫者
+Shulker=潜影贝
+Silverfish=蠹虫
+Warden=监守者
+Breeze=旋风人
+Iron Golem=铁傀儡
+Snow Golem=雪傀儡
+Axolotl=美西螈
+Glow Squid=发光鱿鱼
+Squid=鱿鱼
+Dolphin=海豚
+Turtle=海龟
+Parrot=鹦鹉
+Wolf=狼
+Cat=猫
+Fox=狐狸
+Panda=熊猫
+Llama=羊驼
+Horse=马
+Donkey=驴
+Mule=骡
+Pig=猪
+Cow=牛
+Sheep=绵羊
+Chicken=鸡
+Rabbit=兔子
+Bee=蜜蜂
+Bat=蝙蝠
+Camel=骆驼
+Frog=青蛙
+Tadpole=蝌蚪
+Allay=悦灵
+Sniffer=嗅探兽
+Armadillo=犰狳
+Goat=山羊
+Bone Meal=骨粉
+Bone Block=骨块
+Bone=骨头
+Spawn Egg=刷怪蛋
+Arrow=箭
+Crossbow=弩
+Bow=弓
+Sword=剑
+Pickaxe=镐
+Axe=斧
+Shovel=锹
+Hoe=锄
+Helmet=头盔
+Chestplate=胸甲
+Leggings=护腿
+Boots=靴子
+Shield=盾牌
+Trident=三叉戟
+Diamond=钻石
+Emerald=绿宝石
+Gold Ingot=金锭
+Iron Ingot=铁锭
+Netherite Ingot=下界合金锭
+Netherite=下界合金
+Redstone=红石
+Obsidian=黑曜石
+Charcoal=木炭
+Coal=煤炭
+Gunpowder=火药
+Rotten Flesh=腐肉
+String=线
+Feather=羽毛
+Leather=皮革
+Stick=木棍
+Flint=燧石
+Torch=火把
+Chest=箱子
+Crafting Table=工作台
+Furnace=熔炉
+Anvil=铁砧
+Enchanting Table=附魔台
+Brewing Stand=酿造台
+Beacon=信标
+Nether Star=下界之星
+Nether=下界
+The End=末地
+Overworld=主世界
+Potion=药水
+Totem of Undying=不死图腾
+Elytra=鞘翅`;
+const rx=t=>new RegExp('(?<![A-Za-z])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:s|es)?(?![A-Za-z])','gi');
 function protect(s){const t=[];let x=s.replace(/\r?\n/g,' ');for(const [a,b] of GLO)x=x.replace(rx(a),()=>{t.push(b);return '['+(t.length-1)+']'});x=x.replace(PH,m=>{t.push(m);return '['+(t.length-1)+']'});return{x,t}}
 function restore(s,t){return s.replace(/\[\s*(\d+)\s*\]/g,(m,i)=>t[i]!==undefined?t[i]:m)}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -325,12 +448,21 @@ async function translate(){
   SL=((jobs.find(j=>j.g.code)||{g:{}}).g.code||'en').slice(0,2).toLowerCase();
   $("#go").hidden=true;$("#stop").hidden=false;$("#bar").style.display="block";
   const bar=$("#bar div"),uniq=[...new Set(jobs.map(j=>j.e.src))],cache=new Map();
-  GLO=$("#glo").value.split(/\r?\n/).map(l=>{const i=l.indexOf('=');return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:null}).filter(x=>x&&x[0]&&x[1]).sort((x,y)=>y[0].length-x[0].length);
+  const parse=t=>t.split(/\r?\n/).map(l=>{const i=l.indexOf('=');return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:null}).filter(x=>x&&x[0]&&x[1]);
+  const usr=parse($("#glo").value),have=new Set(usr.map(x=>x[0].toLowerCase()));
+  GLO=[...usr,...($("#bg").checked&&tl.startsWith('zh')?parse(BUILTIN).filter(x=>!have.has(x[0].toLowerCase())):[])].sort((x,y)=>y[0].length-x[0].length);
+  const egg=new Set(jobs.filter(j=>/^item\.spawn_egg\./.test(j.e.key)&&/^Spawn\s+/i.test(j.e.src)).map(j=>j.e.src));
   let n=0,netErr="",qi=0;
   const worker=async()=>{
     while(!sig.aborted&&qi<uniq.length){
-      const s=uniq[qi++],p=protect(s);
-      try{const o=await gcall(p.x,tl,sig);cache.set(s,restore(o.trim(),p.t))}
+      const s=uniq[qi++],ie=egg.has(s)&&tl.startsWith('zh'),p=protect(ie?s.replace(/^Spawn\s+/i,''):s);
+      try{
+        let o=/^\s*(\[\d+\][\s.,:;!?'-]*)+$/.test(p.x)?p.x:(await gcall(p.x,tl,sig)).trim();
+        o=restore(o,p.t);
+        if(tl.startsWith('zh'))o=o.replace(/([\u4e00-\u9fff])[ ]+(?=[\u4e00-\u9fff])/g,'$1');
+        if(ie)o+=tl==='zh-TW'?'生怪蛋':'刷怪蛋';
+        cache.set(s,o);
+      }
       catch(err){if(!sig.aborted)netErr=(err&&err.message)||String(err)}
       n++;bar.style.width=(n/uniq.length*100)+"%";
       await sleep(120);
